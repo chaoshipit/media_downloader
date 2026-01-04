@@ -34,8 +34,8 @@
 # ==============================================================================
 
 
-from app.main import Host_IP, Host_Port
+from app.main import Host_IP
 import uvicorn
 
 if __name__ == '__main__':
-    uvicorn.run('app.main:app', host=Host_IP, port=Host_Port, reload=True, log_level="info")
+    uvicorn.run('app.main:app', host=Host_IP, port=9000, reload=True, log_level="info")
