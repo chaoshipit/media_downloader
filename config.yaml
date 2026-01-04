@@ -1,46 +1,44 @@
 # Web
 Web:
   # APP Switch
-  PyWebIO_Enable: true    # Enable APP | 启用APP
+  PyWebIO_Enable: true # Enable APP | 启用APP
 
   # APP Information
-  Domain: https://douyin.wtf    # Web domain | Web域名
+  Domain: https://douyin.wtf # Web domain | Web域名
 
   # APP Configuration
-  PyWebIO_Theme: minty    # PyWebIO theme | PyWebIO主题
-  Max_Take_URLs: 30    # Maximum number of URLs that can be taken at a time | 一次最多可以取得的URL数量
-
+  PyWebIO_Theme: minty # PyWebIO theme | PyWebIO主题
+  Max_Take_URLs: 30 # Maximum number of URLs that can be taken at a time | 一次最多可以取得的URL数量
 
   # Web Information
-  Tab_Title: Douyin_TikTok_Download_API    # Web title | Web标题
-  Description: Douyin_TikTok_Download_API is a free open-source API service for Douyin/TikTok. It provides a simple, fast, and stable API for developers to develop applications based on Douyin/TikTok.    # Web description | Web描述
-  Favicon: https://raw.githubusercontent.com/Evil0ctal/Douyin_TikTok_Download_API/main/logo/logo192.png    # Web favicon | Web图标
+  Tab_Title: Douyin_TikTok_Download_API # Web title | Web标题
+  Description: Douyin_TikTok_Download_API is a free open-source API service for Douyin/TikTok. It provides a simple, fast, and stable API for developers to develop applications based on Douyin/TikTok. # Web description | Web描述
+  Favicon: https://raw.githubusercontent.com/Evil0ctal/Douyin_TikTok_Download_API/main/logo/logo192.png # Web favicon | Web图标
 
   # Fun Configuration
-  Easter_Egg: true    # Enable Easter Egg | 启用彩蛋
+  Easter_Egg: true # Enable Easter Egg | 启用彩蛋
   Live2D_Enable: true
   Live2D_JS: https://fastly.jsdelivr.net/gh/TikHubIO/TikHub_live2d@latest/autoload.js
 
 # API
 API:
   # Network Configuration
-  Host_IP: 0.0.0.0    # default IP | 默认IP
-  Host_Port: 80    # default port is 80 | 默认端口为80
-  Docs_URL: /docs    # API documentation URL | API文档URL
-  Redoc_URL: /redoc    # API documentation URL | API文档URL
+  Host_IP: 0.0.0.0 # default IP | 默认IP
+  Host_Port: 80 # default port is 80 | 默认端口为80
+  Docs_URL: /docs # API documentation URL | API文档URL
+  Redoc_URL: /redoc # API documentation URL | API文档URL
 
   # API Information
-  Version: V4.1.2    # API version | API版本
-  Update_Time: 2025/03/16    # API update time | API更新时间
-  Environment: Demo    # API environment | API环境
+  Version: V4.1.2 # API version | API版本
+  Update_Time: 2025/03/16 # API update time | API更新时间
+  Environment: Demo # API environment | API环境
 
   # Download Configuration
-  Download_Switch: true    # Enable download function | 启用下载功能
+  Download_Switch: true # Enable download function | 启用下载功能
 
   # File Configuration
-  Download_Path: "./download"    # Default download directory | 默认下载目录
-  Download_File_Prefix: "douyin.wtf_"    # Default download file prefix | 默认下载文件前缀
-
+  Download_Path: "./download" # Default download directory | 默认下载目录
+  Download_File_Prefix: "douyin.wtf_" # Default download file prefix | 默认下载文件前缀
 
 # iOS Shortcut
 iOS_Shortcut:
@@ -50,3 +48,16 @@ iOS_Shortcut:
   iOS_Shortcut_Link_EN: https://www.icloud.com/shortcuts/06f891a026df40cfa967a907feaea632
   iOS_Shortcut_Update_Note: 重构了快捷指令以兼容TikHub API。
   iOS_Shortcut_Update_Note_EN: Refactored the shortcut to be compatible with the TikHub API.
+
+# Cloudflare R2 配置
+R2:
+  # R2 终结点
+  endpoint_url: https://6dab689a27fefd2fba1013bf7eddaf4f.r2.cloudflarestorage.com
+  # R2 访问密钥
+  access_key_id: 3ae1d1a4393f907a04dc6f9d73016087
+  # R2 机密访问密钥
+  secret_access_key: 533de67a0acedb5a14637a57f1df7e0fea1309f8dd36cf303c87fcf2af38cc4c
+  # R2 存储桶名称
+  bucket_name: private-onetapcook
+  # R2 区域（Cloudflare R2 使用 auto）
+  region: auto
