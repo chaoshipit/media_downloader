@@ -4,12 +4,12 @@
 # ==============================================================================
 
 import os
-from datetime import datetime
 
 import boto3
 import httpx
 import yaml
 from botocore.config import Config
+from botocore.exceptions import ClientError
 from fastapi import APIRouter, Header, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
@@ -88,6 +88,36 @@ async def download_video(url: str, headers: dict = None) -> bytes:
         return response.content
 
 
+def check_file_exists_in_r2(object_key: str) -> dict:
+    """
+    检查文件是否在 R2 中存在
+
+    Args:
+        object_key: R2 中的对象路径
+
+    Returns:
+        如果文件存在，返回包含文件信息的字典；如果不存在，返回 None
+    """
+    s3_client = get_r2_client()
+    bucket_name = r2_config.get("bucket_name", "douyin-videos")
+
+    try:
+        response = s3_client.head_object(Bucket=bucket_name, Key=object_key)
+        return {
+            "exists": True,
+            "size": response.get("ContentLength", 0),
+            "size_mb": round(response.get("ContentLength", 0) / 1024 / 1024, 2),
+            "last_modified": response.get("LastModified"),
+        }
+    except ClientError as e:
+        error_code = e.response.get("Error", {}).get("Code", "")
+        if error_code == "404":
+            return {"exists": False}
+        else:
+            # 其他错误，重新抛出异常
+            raise
+
+
 def upload_to_r2(
     file_content: bytes, object_key: str, content_type: str = "video/mp4"
 ) -> str:
@@ -105,9 +135,25 @@ def upload_to_r2(
     s3_client = get_r2_client()
     bucket_name = r2_config.get("bucket_name", "douyin-videos")
 
-    s3_client.put_object(
-        Bucket=bucket_name, Key=object_key, Body=file_content, ContentType=content_type
-    )
+    # 检查文件是否已存在
+    try:
+        s3_client.head_object(Bucket=bucket_name, Key=object_key)
+        # 文件已存在，跳过上传
+        return object_key
+    except ClientError as e:
+        # 如果错误码是 404，说明文件不存在，需要上传
+        error_code = e.response.get("Error", {}).get("Code", "")
+        if error_code == "404":
+            # 文件不存在，执行上传
+            s3_client.put_object(
+                Bucket=bucket_name,
+                Key=object_key,
+                Body=file_content,
+                ContentType=content_type,
+            )
+        else:
+            # 其他错误，重新抛出异常
+            raise
 
     return object_key
 
@@ -233,7 +279,43 @@ async def parse_and_upload_to_r2(
                 f"当前仅支持视频类型，检测到类型: {video_data.get('type')}"
             )
 
-        # 2. 获取视频下载链接
+        # 2. 生成 R2 存储路径
+        video_id = video_data.get("video_id", "unknown")
+        desc = video_data.get("desc", "")
+
+        # 生成文件名
+        filename = f"{video_id}.mp4"
+        object_key = f"douyin/{filename}"
+
+        # 3. 检查文件是否已在 R2 中存在
+        file_info = check_file_exists_in_r2(object_key)
+        if file_info.get("exists"):
+            # 文件已存在，直接返回，跳过下载和上传
+            result = {
+                "video_info": {
+                    "video_id": video_id,
+                    "desc": desc,
+                    "platform": video_data.get("platform"),
+                    "type": video_data.get("type"),
+                    "create_time": video_data.get("create_time"),
+                    "author": video_data.get("author", {}).get("nickname")
+                    if isinstance(video_data.get("author"), dict)
+                    else None,
+                    "statistics": video_data.get("statistics"),
+                    "cover": video_data.get("cover_data", {}).get("cover"),
+                },
+                "r2_storage": {
+                    "bucket": r2_config.get("bucket_name"),
+                    "path": object_key,
+                    "file_size": file_info.get("size", 0),
+                    "file_size_mb": file_info.get("size_mb", 0),
+                },
+                "quality": body.quality,
+                "already_exists": True,
+            }
+            return ResponseModel(code=200, router=request.url.path, data=result)
+
+        # 4. 获取视频下载链接
         video_urls = video_data.get("video_data", {})
         if body.quality == "high":
             download_url = video_urls.get("nwm_video_url_HQ") or video_urls.get(
@@ -251,27 +333,16 @@ async def parse_and_upload_to_r2(
         if not download_url:
             raise ValueError("无法获取视频下载链接")
 
-        # 3. 下载视频
+        # 5. 下载视频
         video_content = await download_video(download_url)
 
         if not video_content:
             raise ValueError("视频下载失败")
 
-        # 4. 生成 R2 存储路径 (年/月/日/video_id.mp4)
-        now = datetime.now()
-        date_path = now.strftime("%Y/%m/%d")
-
-        video_id = video_data.get("video_id", "unknown")
-        desc = video_data.get("desc", "")
-
-        # 生成文件名
-        filename = f"{video_id}.mp4"
-        object_key = f"douyin/{date_path}/{filename}"
-
-        # 5. 上传到 R2
+        # 6. 上传到 R2
         upload_to_r2(video_content, object_key)
 
-        # 6. 构建返回数据
+        # 7. 构建返回数据
         result = {
             "video_info": {
                 "video_id": video_id,
@@ -292,6 +363,7 @@ async def parse_and_upload_to_r2(
                 "file_size_mb": round(len(video_content) / 1024 / 1024, 2),
             },
             "quality": body.quality,
+            "already_exists": False,
         }
 
         return ResponseModel(code=200, router=request.url.path, data=result)
