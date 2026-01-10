@@ -36,28 +36,42 @@
 import asyncio  # 异步I/O
 import os  # 系统操作
 import time  # 时间操作
-from urllib.parse import urlencode, quote  # URL编码
+from urllib.parse import urlencode  # URL编码
+
 import yaml  # 配置文件
 
 # 基础爬虫客户端和抖音API端点
 from crawlers.base_crawler import BaseCrawler
 from crawlers.douyin.web.endpoints import DouyinAPIEndpoints
+
 # 抖音接口数据请求模型
 from crawlers.douyin.web.models import (
-    BaseRequestModel, LiveRoomRanking, PostComments,
-    PostCommentsReply, PostDetail,
-    UserProfile, UserCollection, UserLike, UserLive,
-    UserLive2, UserMix, UserPost
+    BaseRequestModel,
+    LiveRoomRanking,
+    PostComments,
+    PostCommentsReply,
+    PostDetail,
+    UserCollection,
+    UserCollects,
+    UserCollectsVideo,
+    UserLike,
+    UserLive,
+    UserLive2,
+    UserMix,
+    UserPost,
+    UserProfile,
 )
+
 # 抖音应用的工具类
-from crawlers.douyin.web.utils import (AwemeIdFetcher,  # Aweme ID获取
-                                       BogusManager,  # XBogus管理
-                                       SecUserIdFetcher,  # 安全用户ID获取
-                                       TokenManager,  # 令牌管理
-                                       VerifyFpManager,  # 验证管理
-                                       WebCastIdFetcher,  # 直播ID获取
-                                       extract_valid_urls  # URL提取
-                                       )
+from crawlers.douyin.web.utils import (  # Aweme ID获取
+    AwemeIdFetcher,
+    BogusManager,  # XBogus管理
+    SecUserIdFetcher,  # 安全用户ID获取
+    TokenManager,  # 令牌管理
+    VerifyFpManager,  # 验证管理
+    WebCastIdFetcher,  # 直播ID获取
+    extract_valid_urls,  # URL提取
+)
 
 # 配置文件路径
 path = os.path.abspath(os.path.dirname(__file__))
@@ -68,7 +82,6 @@ with open(f"{path}/config.yaml", "r", encoding="utf-8") as f:
 
 
 class DouyinWebCrawler:
-
     # 从配置文件中获取抖音的请求头
     async def get_douyin_headers(self):
         douyin_config = config["TokenManager"]["douyin"]
@@ -79,7 +92,10 @@ class DouyinWebCrawler:
                 "Referer": douyin_config["headers"]["Referer"],
                 "Cookie": douyin_config["headers"]["Cookie"],
             },
-            "proxies": {"http://": douyin_config["proxies"]["http"], "https://": douyin_config["proxies"]["https"]},
+            "proxies": {
+                "http://": douyin_config["proxies"]["http"],
+                "https://": douyin_config["proxies"]["https"],
+            },
         }
         return kwargs
 
@@ -90,7 +106,9 @@ class DouyinWebCrawler:
         # 获取抖音的实时Cookie
         kwargs = await self.get_douyin_headers()
         # 创建一个基础爬虫
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
             # 创建一个作品详情的BaseModel参数
             params = PostDetail(aweme_id=aweme_id)
@@ -102,19 +120,27 @@ class DouyinWebCrawler:
 
             # 生成一个作品详情的带有a_bogus加密参数的Endpoint
             params_dict = params.dict()
-            params_dict["msToken"] = ''
-            a_bogus = BogusManager.ab_model_2_endpoint(params_dict, kwargs["headers"]["User-Agent"])
+            params_dict["msToken"] = ""
+            a_bogus = BogusManager.ab_model_2_endpoint(
+                params_dict, kwargs["headers"]["User-Agent"]
+            )
             endpoint = f"{DouyinAPIEndpoints.POST_DETAIL}?{urlencode(params_dict)}&a_bogus={a_bogus}"
 
             response = await crawler.fetch_get_json(endpoint)
         return response
 
     # 获取用户发布作品数据
-    async def fetch_user_post_videos(self, sec_user_id: str, max_cursor: int, count: int):
+    async def fetch_user_post_videos(
+        self, sec_user_id: str, max_cursor: int, count: int
+    ):
         kwargs = await self.get_douyin_headers()
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
-            params = UserPost(sec_user_id=sec_user_id, max_cursor=max_cursor, count=count)
+            params = UserPost(
+                sec_user_id=sec_user_id, max_cursor=max_cursor, count=count
+            )
             # endpoint = BogusManager.xb_model_2_endpoint(
             #     DouyinAPIEndpoints.USER_POST, params.dict(), kwargs["headers"]["User-Agent"]
             # )
@@ -122,53 +148,113 @@ class DouyinWebCrawler:
 
             # 生成一个用户发布作品数据的带有a_bogus加密参数的Endpoint
             params_dict = params.dict()
-            params_dict["msToken"] = ''
-            a_bogus = BogusManager.ab_model_2_endpoint(params_dict, kwargs["headers"]["User-Agent"])
+            params_dict["msToken"] = ""
+            a_bogus = BogusManager.ab_model_2_endpoint(
+                params_dict, kwargs["headers"]["User-Agent"]
+            )
             endpoint = f"{DouyinAPIEndpoints.USER_POST}?{urlencode(params_dict)}&a_bogus={a_bogus}"
 
             response = await crawler.fetch_get_json(endpoint)
         return response
 
     # 获取用户喜欢作品数据
-    async def fetch_user_like_videos(self, sec_user_id: str, max_cursor: int, count: int):
+    async def fetch_user_like_videos(
+        self, sec_user_id: str, max_cursor: int, count: int
+    ):
         kwargs = await self.get_douyin_headers()
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
-            params = UserLike(sec_user_id=sec_user_id, max_cursor=max_cursor, count=count)
+            params = UserLike(
+                sec_user_id=sec_user_id, max_cursor=max_cursor, count=count
+            )
             # endpoint = BogusManager.xb_model_2_endpoint(
             #     DouyinAPIEndpoints.USER_FAVORITE_A, params.dict(), kwargs["headers"]["User-Agent"]
             # )
             # response = await crawler.fetch_get_json(endpoint)
 
             params_dict = params.dict()
-            params_dict["msToken"] = ''
-            a_bogus = BogusManager.ab_model_2_endpoint(params_dict, kwargs["headers"]["User-Agent"])
+            params_dict["msToken"] = ""
+            a_bogus = BogusManager.ab_model_2_endpoint(
+                params_dict, kwargs["headers"]["User-Agent"]
+            )
             endpoint = f"{DouyinAPIEndpoints.USER_FAVORITE_A}?{urlencode(params_dict)}&a_bogus={a_bogus}"
 
             response = await crawler.fetch_get_json(endpoint)
         return response
 
     # 获取用户收藏作品数据（用户提供自己的Cookie）
-    async def fetch_user_collection_videos(self, cookie: str, cursor: int = 0, count: int = 20):
+    async def fetch_user_collection_videos(
+        self, cookie: str, cursor: int = 0, count: int = 20
+    ):
         kwargs = await self.get_douyin_headers()
         kwargs["headers"]["Cookie"] = cookie
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
             params = UserCollection(cursor=cursor, count=count)
             endpoint = BogusManager.xb_model_2_endpoint(
-                DouyinAPIEndpoints.USER_COLLECTION, params.dict(), kwargs["headers"]["User-Agent"]
+                DouyinAPIEndpoints.USER_COLLECTION,
+                params.dict(),
+                kwargs["headers"]["User-Agent"],
             )
             response = await crawler.fetch_post_json(endpoint)
         return response
 
-    # 获取用户合辑作品数据
-    async def fetch_user_mix_videos(self, mix_id: str, cursor: int = 0, count: int = 20):
+    # 获取用户所有收藏夹列表
+    async def fetch_user_collects(self, cursor: int = 0, count: int = 20):
         kwargs = await self.get_douyin_headers()
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
+        async with base_crawler as crawler:
+            params = UserCollects(cursor=cursor, count=count)
+            params_dict = params.dict()
+            params_dict["msToken"] = ""
+            a_bogus = BogusManager.ab_model_2_endpoint(
+                params_dict, kwargs["headers"]["User-Agent"]
+            )
+            endpoint = f"{DouyinAPIEndpoints.USER_COLLECTS}?{urlencode(params_dict)}&a_bogus={a_bogus}"
+            response = await crawler.fetch_get_json(endpoint)
+        return response
+
+    # 获取指定收藏夹内的视频列表
+    async def fetch_user_collects_videos(
+        self, collects_id: str, cursor: int = 0, count: int = 20
+    ):
+        kwargs = await self.get_douyin_headers()
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
+        async with base_crawler as crawler:
+            params = UserCollectsVideo(
+                collects_id=collects_id, cursor=cursor, count=count
+            )
+            params_dict = params.dict()
+            params_dict["msToken"] = ""
+            a_bogus = BogusManager.ab_model_2_endpoint(
+                params_dict, kwargs["headers"]["User-Agent"]
+            )
+            endpoint = f"{DouyinAPIEndpoints.USER_COLLECTS_VIDEO}?{urlencode(params_dict)}&a_bogus={a_bogus}"
+            response = await crawler.fetch_get_json(endpoint)
+        return response
+
+    # 获取用户合辑作品数据
+    async def fetch_user_mix_videos(
+        self, mix_id: str, cursor: int = 0, count: int = 20
+    ):
+        kwargs = await self.get_douyin_headers()
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
             params = UserMix(mix_id=mix_id, cursor=cursor, count=count)
             endpoint = BogusManager.xb_model_2_endpoint(
-                DouyinAPIEndpoints.MIX_AWEME, params.dict(), kwargs["headers"]["User-Agent"]
+                DouyinAPIEndpoints.MIX_AWEME,
+                params.dict(),
+                kwargs["headers"]["User-Agent"],
             )
             response = await crawler.fetch_get_json(endpoint)
         return response
@@ -176,11 +262,15 @@ class DouyinWebCrawler:
     # 获取用户直播流数据
     async def fetch_user_live_videos(self, webcast_id: str, room_id_str=""):
         kwargs = await self.get_douyin_headers()
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
             params = UserLive(web_rid=webcast_id, room_id_str=room_id_str)
             endpoint = BogusManager.xb_model_2_endpoint(
-                DouyinAPIEndpoints.LIVE_INFO, params.dict(), kwargs["headers"]["User-Agent"]
+                DouyinAPIEndpoints.LIVE_INFO,
+                params.dict(),
+                kwargs["headers"]["User-Agent"],
             )
             response = await crawler.fetch_get_json(endpoint)
         return response
@@ -188,11 +278,15 @@ class DouyinWebCrawler:
     # 获取指定用户的直播流数据
     async def fetch_user_live_videos_by_room_id(self, room_id: str):
         kwargs = await self.get_douyin_headers()
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
             params = UserLive2(room_id=room_id)
             endpoint = BogusManager.xb_model_2_endpoint(
-                DouyinAPIEndpoints.LIVE_INFO_ROOM_ID, params.dict(), kwargs["headers"]["User-Agent"]
+                DouyinAPIEndpoints.LIVE_INFO_ROOM_ID,
+                params.dict(),
+                kwargs["headers"]["User-Agent"],
             )
             response = await crawler.fetch_get_json(endpoint)
         return response
@@ -200,11 +294,15 @@ class DouyinWebCrawler:
     # 获取直播间送礼用户排行榜
     async def fetch_live_gift_ranking(self, room_id: str, rank_type: int = 30):
         kwargs = await self.get_douyin_headers()
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
             params = LiveRoomRanking(room_id=room_id, rank_type=rank_type)
             endpoint = BogusManager.xb_model_2_endpoint(
-                DouyinAPIEndpoints.LIVE_GIFT_RANK, params.dict(), kwargs["headers"]["User-Agent"]
+                DouyinAPIEndpoints.LIVE_GIFT_RANK,
+                params.dict(),
+                kwargs["headers"]["User-Agent"],
             )
             response = await crawler.fetch_get_json(endpoint)
         return response
@@ -212,35 +310,53 @@ class DouyinWebCrawler:
     # 获取指定用户的信息
     async def handler_user_profile(self, sec_user_id: str):
         kwargs = await self.get_douyin_headers()
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
             params = UserProfile(sec_user_id=sec_user_id)
             endpoint = BogusManager.xb_model_2_endpoint(
-                DouyinAPIEndpoints.USER_DETAIL, params.dict(), kwargs["headers"]["User-Agent"]
+                DouyinAPIEndpoints.USER_DETAIL,
+                params.dict(),
+                kwargs["headers"]["User-Agent"],
             )
             response = await crawler.fetch_get_json(endpoint)
         return response
 
     # 获取指定视频的评论数据
-    async def fetch_video_comments(self, aweme_id: str, cursor: int = 0, count: int = 20):
+    async def fetch_video_comments(
+        self, aweme_id: str, cursor: int = 0, count: int = 20
+    ):
         kwargs = await self.get_douyin_headers()
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
             params = PostComments(aweme_id=aweme_id, cursor=cursor, count=count)
             endpoint = BogusManager.xb_model_2_endpoint(
-                DouyinAPIEndpoints.POST_COMMENT, params.dict(), kwargs["headers"]["User-Agent"]
+                DouyinAPIEndpoints.POST_COMMENT,
+                params.dict(),
+                kwargs["headers"]["User-Agent"],
             )
             response = await crawler.fetch_get_json(endpoint)
         return response
 
     # 获取指定视频的评论回复数据
-    async def fetch_video_comments_reply(self, item_id: str, comment_id: str, cursor: int = 0, count: int = 20):
+    async def fetch_video_comments_reply(
+        self, item_id: str, comment_id: str, cursor: int = 0, count: int = 20
+    ):
         kwargs = await self.get_douyin_headers()
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
-            params = PostCommentsReply(item_id=item_id, comment_id=comment_id, cursor=cursor, count=count)
+            params = PostCommentsReply(
+                item_id=item_id, comment_id=comment_id, cursor=cursor, count=count
+            )
             endpoint = BogusManager.xb_model_2_endpoint(
-                DouyinAPIEndpoints.POST_COMMENT_REPLY, params.dict(), kwargs["headers"]["User-Agent"]
+                DouyinAPIEndpoints.POST_COMMENT_REPLY,
+                params.dict(),
+                kwargs["headers"]["User-Agent"],
             )
             response = await crawler.fetch_get_json(endpoint)
         return response
@@ -248,11 +364,15 @@ class DouyinWebCrawler:
     # 获取抖音热榜数据
     async def fetch_hot_search_result(self):
         kwargs = await self.get_douyin_headers()
-        base_crawler = BaseCrawler(proxies=kwargs["proxies"], crawler_headers=kwargs["headers"])
+        base_crawler = BaseCrawler(
+            proxies=kwargs["proxies"], crawler_headers=kwargs["headers"]
+        )
         async with base_crawler as crawler:
             params = BaseRequestModel()
             endpoint = BogusManager.xb_model_2_endpoint(
-                DouyinAPIEndpoints.DOUYIN_HOT_SEARCH, params.dict(), kwargs["headers"]["User-Agent"]
+                DouyinAPIEndpoints.DOUYIN_HOT_SEARCH,
+                params.dict(),
+                kwargs["headers"]["User-Agent"],
             )
             response = await crawler.fetch_get_json(endpoint)
         return response
@@ -260,31 +380,31 @@ class DouyinWebCrawler:
     "-------------------------------------------------------utils接口列表-------------------------------------------------------"
 
     # 生成真实msToken
-    async def gen_real_msToken(self, ):
-        result = {
-            "msToken": TokenManager().gen_real_msToken()
-        }
+    async def gen_real_msToken(
+        self,
+    ):
+        result = {"msToken": TokenManager().gen_real_msToken()}
         return result
 
     # 生成ttwid
-    async def gen_ttwid(self, ):
-        result = {
-            "ttwid": TokenManager().gen_ttwid()
-        }
+    async def gen_ttwid(
+        self,
+    ):
+        result = {"ttwid": TokenManager().gen_ttwid()}
         return result
 
     # 生成verify_fp
-    async def gen_verify_fp(self, ):
-        result = {
-            "verify_fp": VerifyFpManager.gen_verify_fp()
-        }
+    async def gen_verify_fp(
+        self,
+    ):
+        result = {"verify_fp": VerifyFpManager.gen_verify_fp()}
         return result
 
     # 生成s_v_web_id
-    async def gen_s_v_web_id(self, ):
-        result = {
-            "s_v_web_id": VerifyFpManager.gen_s_v_web_id()
-        }
+    async def gen_s_v_web_id(
+        self,
+    ):
+        result = {"s_v_web_id": VerifyFpManager.gen_s_v_web_id()}
         return result
 
     # 使用接口地址生成Xb参数
@@ -293,7 +413,7 @@ class DouyinWebCrawler:
         result = {
             "url": url,
             "x_bogus": url.split("&X-Bogus=")[1],
-            "user_agent": user_agent
+            "user_agent": user_agent,
         }
         return result
 
@@ -308,7 +428,7 @@ class DouyinWebCrawler:
         result = {
             "url": f"{endpoint}?{urlencode(params)}&a_bogus={a_bogus}",
             "a_bogus": a_bogus,
-            "user_agent": user_agent
+            "user_agent": user_agent,
         }
         return result
 
@@ -351,22 +471,30 @@ class DouyinWebCrawler:
     async def update_cookie(self, cookie: str):
         """
         更新指定服务的Cookie
-        
+
         Args:
             service: 服务名称 (如: douyin_web)
             cookie: 新的Cookie值
         """
         global config
         service = "douyin"
-        print('DouyinWebCrawler before update', config["TokenManager"][service]["headers"]["Cookie"])
-        print('DouyinWebCrawler to update', cookie)
+        print(
+            "DouyinWebCrawler before update",
+            config["TokenManager"][service]["headers"]["Cookie"],
+        )
+        print("DouyinWebCrawler to update", cookie)
         # 1. 更新内存中的配置（立即生效）
         config["TokenManager"][service]["headers"]["Cookie"] = cookie
-        print('DouyinWebCrawler cookie updated', config["TokenManager"][service]["headers"]["Cookie"])
+        print(
+            "DouyinWebCrawler cookie updated",
+            config["TokenManager"][service]["headers"]["Cookie"],
+        )
         # 2. 写入配置文件（持久化）
         config_path = f"{path}/config.yaml"
-        with open(config_path, 'w', encoding='utf-8') as file:
-            yaml.dump(config, file, default_flow_style=False, allow_unicode=True, indent=2)
+        with open(config_path, "w", encoding="utf-8") as file:
+            yaml.dump(
+                config, file, default_flow_style=False, allow_unicode=True, indent=2
+            )
 
     async def main(self):
         """-------------------------------------------------------handler接口列表-------------------------------------------------------"""

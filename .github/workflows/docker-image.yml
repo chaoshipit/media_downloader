@@ -24,19 +24,8 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t media-downloader:${{ env.IMAGE_TAG }} .
-          docker tag media-downloader:${{ env.IMAGE_TAG }} ccr.ccs.tencentyun.com/chaoship/media-downloader:${{ env.IMAGE_TAG }}
-          docker tag media-downloader:${{ env.IMAGE_TAG }} ccr.ccs.tencentyun.com/chaoship/media-downloader:latest
 
-      # 推送镜像到腾讯云
-      - name: Push to Tencent Cloud Registry
+      # 直接运行服务
+      - name: Run Service
         run: |
-          docker login ccr.ccs.tencentyun.com --username=100000782272 --password=Dream001$
-          docker push ccr.ccs.tencentyun.com/chaoship/media-downloader:${{ env.IMAGE_TAG }}
-          docker push ccr.ccs.tencentyun.com/chaoship/media-downloader:latest
-
-      # 清理本地镜像
-      - name: Cleanup Local Images
-        run: |
-          docker rmi media-downloader:${{ env.IMAGE_TAG }} || true
-          docker rmi ccr.ccs.tencentyun.com/chaoship/media-downloader:${{ env.IMAGE_TAG }} || true
-          docker rmi ccr.ccs.tencentyun.com/chaoship/media-downloader:latest || true
+          docker run -d --name media-downloader -p 9000:9000 media-downloader:${{ env.IMAGE_TAG }}

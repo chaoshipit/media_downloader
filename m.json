@@ -1,0 +1,126 @@
+{
+  "code": 200,
+  "router": "/api/douyin/web/fetch_user_collects",
+  "data": {
+    "collects_list": [
+      {
+        "app_id": 1128,
+        "collects_cover": {
+          "uri": "image-cut-tos/48b11a624e6eb59ca69389c83bd41377",
+          "url_list": [
+            "https://p3-pc.douyinpic.com/obj/image-cut-tos/48b11a624e6eb59ca69389c83bd41377?from=1347513714"
+          ]
+        },
+        "collects_id": 7368762209146607423,
+        "collects_id_str": "7368762209146607423",
+        "collects_name": "美食",
+        "create_time": 1715674394,
+        "follow_status": 0,
+        "followed_count": 0,
+        "is_normal_status": false,
+        "item_type": 2,
+        "last_collect_time": 1767956810,
+        "play_count": 3,
+        "sicily_collects_cover_list": null,
+        "states": 1,
+        "status": 0,
+        "system_type": 0,
+        "total_number": 3,
+        "user_id": 71700714277,
+        "user_id_str": "71700714277",
+        "user_info": {
+          "avatar_larger": {
+            "height": 720,
+            "uri": "1080x1080/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA",
+            "url_list": [
+              "https://p3-pc.douyinpic.com/aweme/1080x1080/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA.jpeg?from=2956013662"
+            ],
+            "width": 720
+          },
+          "avatar_medium": {
+            "height": 720,
+            "uri": "720x720/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA",
+            "url_list": [
+              "https://p3-pc.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA.jpeg?from=2956013662"
+            ],
+            "width": 720
+          },
+          "avatar_thumb": {
+            "height": 720,
+            "uri": "100x100/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA",
+            "url_list": [
+              "https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA.jpeg?from=2956013662"
+            ],
+            "width": 720
+          },
+          "nickname": "shipit",
+          "uid": "71700714277"
+        }
+      },
+      {
+        "app_id": 1128,
+        "collects_cover": {
+          "uri": "image-cut-tos/e9860c52a2b7d973d29a8b265a6bc8c2",
+          "url_list": [
+            "https://p3-pc.douyinpic.com/obj/image-cut-tos/e9860c52a2b7d973d29a8b265a6bc8c2?from=1347513714"
+          ]
+        },
+        "collects_id": 7468183265007130427,
+        "collects_id_str": "7468183265007130427",
+        "collects_name": "装修",
+        "create_time": 1738822333,
+        "follow_status": 0,
+        "followed_count": 0,
+        "is_normal_status": false,
+        "item_type": 2,
+        "last_collect_time": 1738822333,
+        "play_count": 0,
+        "sicily_collects_cover_list": null,
+        "states": 1,
+        "status": 0,
+        "system_type": 0,
+        "total_number": 1,
+        "user_id": 71700714277,
+        "user_id_str": "71700714277",
+        "user_info": {
+          "avatar_larger": {
+            "height": 720,
+            "uri": "1080x1080/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA",
+            "url_list": [
+              "https://p3-pc.douyinpic.com/aweme/1080x1080/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA.jpeg?from=2956013662"
+            ],
+            "width": 720
+          },
+          "avatar_medium": {
+            "height": 720,
+            "uri": "720x720/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA",
+            "url_list": [
+              "https://p3-pc.douyinpic.com/aweme/720x720/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA.jpeg?from=2956013662"
+            ],
+            "width": 720
+          },
+          "avatar_thumb": {
+            "height": 720,
+            "uri": "100x100/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA",
+            "url_list": [
+              "https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_oYfm9C9CAFDmfasEcFFcHEAwA7AyIgChh7ANIA.jpeg?from=2956013662"
+            ],
+            "width": 720
+          },
+          "nickname": "shipit",
+          "uid": "71700714277"
+        }
+      }
+    ],
+    "cursor": 2,
+    "extra": {
+      "fatal_item_ids": [],
+      "logid": "202601101736295E5AAFED91C33A754496",
+      "now": 1768037789000
+    },
+    "has_more": false,
+    "log_pb": { "impr_id": "202601101736295E5AAFED91C33A754496" },
+    "status_code": 0,
+    "total_number": 2
+  }
+}
